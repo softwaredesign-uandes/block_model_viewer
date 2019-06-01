@@ -17,12 +17,8 @@
 	</head>
 	<body>
 
-		<div id="info">
-			<a href="https://threejs.org/" target="_blank" rel="noopener">three.js</a> - voxel painter - webgl<br>
-			<strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel
-		</div>
-
 		<script src="files/three.js"></script>
+		<script src="files/orbitControls.js"></script>
 
 		<script src="files/WebGL.js"></script>
 
@@ -35,57 +31,24 @@
 			}
 
 			var camera, scene, renderer;
-			var plane, cube;
-			var mouse, raycaster, isShiftDown = false;
+			var controls;
+			var blockMeshes = [];
 
-			var rollOverMesh, rollOverMaterial;
-			var cubeGeo, cubeMaterial;
-
-			var objects = [];
+			var blockSize = 50;
+			var blockColorProperty = "grade";
 
 			init();
-			render();
+			animate();
 
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
 				camera.position.set( 500, 800, 1300 );
 				camera.lookAt( 0, 0, 0 );
+				camera.up.set(0, 0, 1);
 
 				scene = new THREE.Scene();
 				scene.background = new THREE.Color( 0xf0f0f0 );
-
-				// roll-over helpers
-
-				var rollOverGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
-				rollOverMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, opacity: 0.5, transparent: true } );
-				rollOverMesh = new THREE.Mesh( rollOverGeo, rollOverMaterial );
-				scene.add( rollOverMesh );
-
-				// cubes
-
-				cubeGeo = new THREE.BoxBufferGeometry( 50, 50, 50 );
-				cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xfeb74c, map: new THREE.TextureLoader().load( 'textures/square-outline-textured.png' ) } );
-
-				// grid
-
-				var gridHelper = new THREE.GridHelper( 1000, 20 );
-				scene.add( gridHelper );
-
-				//
-
-				raycaster = new THREE.Raycaster();
-				mouse = new THREE.Vector2();
-
-				var geometry = new THREE.PlaneBufferGeometry( 1000, 1000 );
-				geometry.rotateX( - Math.PI / 2 );
-
-				plane = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { visible: false } ) );
-				scene.add( plane );
-
-				objects.push( plane );
-
-				// lights
 
 				var ambientLight = new THREE.AmbientLight( 0x606060 );
 				scene.add( ambientLight );
@@ -99,15 +62,71 @@
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
 
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-				document.addEventListener( 'keydown', onDocumentKeyDown, false );
-				document.addEventListener( 'keyup', onDocumentKeyUp, false );
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.update();
 
-				//
 
 				window.addEventListener( 'resize', onWindowResize, false );
+				document.addEventListener( 'keydown', onDocumentKeyDown, false );
 
+				loadBlockModel();
+			}
+
+			function loadBlockModel() {
+				
+				var blocks = [
+					{
+						"position": [0, 0, 0],
+						"grade": 0.1,
+						"weight": 0.8
+					},
+					{
+						"position": [0, 1, 0],
+						"grade": 0.3,
+						"weight": 1.0
+					},
+					{
+						"position": [1, 0, 0],
+						"grade": 0.25,
+						"weight": 0.5
+					},
+					{
+						"position": [1, 1, 0],
+						"grade": 1.0,
+						"weight": 0.2
+					},
+					{
+						"position": [0, 0, 1],
+						"grade": 0.5,
+						"weight": 0.1
+					}
+				];
+
+				for(var i=0; i<blocks.length; i++) {
+					addBlock(blocks[i]);
+				}
+			}
+
+			function addBlock(block) {
+				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block) } );
+				var cubeGeo = new THREE.BoxBufferGeometry( blockSize, blockSize, blockSize );
+				var blockMesh = new THREE.Mesh( cubeGeo, cubeMaterial );
+				blockMesh.position.set( blockSize * block.position[0], blockSize * block.position[1], blockSize * block.position[2]);
+				scene.add( blockMesh );
+				blockMeshes.push(blockMesh);
+			}
+
+			function getBlockColor(block) {
+				var hue = blockColorProperty == "grade" ? 168 : 50;
+				var lightning = block[blockColorProperty] * 100;
+				var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
+				return new THREE.Color(hsl);
+			}
+
+			function clearScene() {
+				for(var i=0; i<blockMeshes.length; i++) {
+					scene.remove(blockMeshes[i]);
+				}; 
 			}
 
 			function onWindowResize() {
@@ -119,95 +138,23 @@
 
 			}
 
-			function onDocumentMouseMove( event ) {
-
-				event.preventDefault();
-
-				mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
-
-				raycaster.setFromCamera( mouse, camera );
-
-				var intersects = raycaster.intersectObjects( objects );
-
-				if ( intersects.length > 0 ) {
-
-					var intersect = intersects[ 0 ];
-
-					rollOverMesh.position.copy( intersect.point ).add( intersect.face.normal );
-					rollOverMesh.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
-
-				}
-
-				render();
-
-			}
-
-			function onDocumentMouseDown( event ) {
-
-				event.preventDefault();
-
-				mouse.set( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1 );
-
-				raycaster.setFromCamera( mouse, camera );
-
-				var intersects = raycaster.intersectObjects( objects );
-
-				if ( intersects.length > 0 ) {
-
-					var intersect = intersects[ 0 ];
-
-					// delete cube
-
-					if ( isShiftDown ) {
-
-						if ( intersect.object !== plane ) {
-
-							scene.remove( intersect.object );
-
-							objects.splice( objects.indexOf( intersect.object ), 1 );
-
-						}
-
-						// create cube
-
-					} else {
-
-						var voxel = new THREE.Mesh( cubeGeo, cubeMaterial );
-						voxel.position.copy( intersect.point ).add( intersect.face.normal );
-						voxel.position.divideScalar( 50 ).floor().multiplyScalar( 50 ).addScalar( 25 );
-						scene.add( voxel );
-
-						objects.push( voxel );
-
-					}
-
-					render();
-
-				}
-
-			}
-
 			function onDocumentKeyDown( event ) {
-
 				switch ( event.keyCode ) {
 
-					case 16: isShiftDown = true; break;
+					case 65: 
+						blockColorProperty = "weight";
+						clearScene();
+						loadBlockModel();
+						break;
 
 				}
-
 			}
 
-			function onDocumentKeyUp( event ) {
+			function animate() {
 
-				switch ( event.keyCode ) {
+				requestAnimationFrame( animate );
 
-					case 16: isShiftDown = false; break;
-
-				}
-
-			}
-
-			function render() {
+				controls.update();
 
 				renderer.render( scene, camera );
 
