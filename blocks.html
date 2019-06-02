@@ -46,25 +46,23 @@
 
 			function init() {
 
-				scene = new THREE.Scene();
-				scene.background = new THREE.Color( 0xf0f0f0 );
-
-				renderer = new THREE.WebGLRenderer( { antialias: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				document.body.appendChild( renderer.domElement );
-
-				window.addEventListener( 'resize', onWindowResize, false );
-				document.addEventListener( 'keydown', onDocumentKeyDown, false );
-
+				createScene();
 				createCamera();
 				createLights();
 				createObjectGeometry();
 
+				createRenderer();
 				createCameraControls();
-
+				
+				setEventListeners();
+				
 				generateBlocks();
 				loadBlockModel();
+			}
+
+			function createScene() {
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
 			}
 
 			function createCamera() {
@@ -88,9 +86,21 @@
 				cubeGeometry = new THREE.BoxBufferGeometry( blockSize, blockSize, blockSize );
 			}
 
+			function createRenderer() {
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+			}
+
 			function createCameraControls() {
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.update();
+			}
+
+			function setEventListeners() {
+				window.addEventListener( 'resize', onWindowResize, false );
+				document.addEventListener( 'keydown', onDocumentKeyDown, false );
 			}
 
 			function generateBlocks() {
@@ -122,7 +132,8 @@
 			}
 
 			function isBlockInCore(i, j, k, xSize, ySize, zSize){
-				return i > (1.0/3.0)*xSize && i < (2.0/3.0)*xSize && j > (1.0/3.0)*ySize && j < (2.0/3.0)*ySize && k < (1.0/3.0)*zSize;
+				return i > (1.0/3.0) * xSize && i < (2.0/3.0) * xSize && j > (1.0/3.0) * ySize && 
+					j < (2.0/3.0) * ySize && k < (1.0/3.0) * zSize;
 			}
 
 			function loadBlockModel() {
@@ -133,10 +144,12 @@
 			}
 
 			function addBlock(block) {
-				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), opacity: Math.max(0.02, block.grades[currentGrade]), transparent: transparent } );
+				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), 
+					opacity: Math.max(0.02, block.grades[currentGrade]), transparent: transparent } );
 				var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
 				var blockSizeWithOffset = blockSize * 1.1;
-				blockMesh.position.set( blockSizeWithOffset * block.x_index, blockSizeWithOffset * block.y_index, blockSizeWithOffset * block.z_index);
+				blockMesh.position.set( blockSizeWithOffset * block.x_index,
+					blockSizeWithOffset * block.y_index, blockSizeWithOffset * block.z_index);
 				scene.add( blockMesh );
 				blockMeshes.push(blockMesh);
 			}
