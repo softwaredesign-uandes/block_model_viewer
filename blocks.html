@@ -47,7 +47,7 @@
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
-				camera.position.set( 500, 800, 1300 );
+				camera.position.set( 2000, 2000, 3300 );
 				camera.lookAt( 0, 0, 0 );
 				camera.up.set(0, 0, 1);
 
@@ -57,9 +57,9 @@
 				var ambientLight = new THREE.AmbientLight( 0x606060 );
 				scene.add( ambientLight );
 
-				var directionalLight = new THREE.PointLight( 0xffffff );
-				directionalLight.position.set( 1000, 1000, 1000 );
-				scene.add( directionalLight );
+				var lLight = new THREE.PointLight( 0xffffff );
+				lLight.position.set( 1000, 1000, 1000 );
+				scene.add( lLight );
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
@@ -126,7 +126,7 @@
 				if (block.grades[currentGrade] < 0.001)
 					return new THREE.Color(0x999999);
 				var hue = currentGrade == "cu" ? 168 : 50;
-				var lightning = Math.floor((0.7 - block.grades[currentGrade]) * 100);
+				var lightning = Math.floor(block.grades[currentGrade] * 70);
 				var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
 				return new THREE.Color(hsl);
 			}
