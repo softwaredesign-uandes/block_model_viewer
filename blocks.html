@@ -32,10 +32,14 @@
 
 			var camera, scene, renderer;
 			var controls;
-			var blockMeshes = [];
+			var cubeGeo;
 
+			var blockMeshes = [];
+			var blocks;
 			var blockSize = 50;
-			var blockColorProperty = "grade";
+
+			var currentGrade = "cu";
+			var transparent = false;
 
 			init();
 			animate();
@@ -65,60 +69,61 @@
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.update();
 
+				cubeGeo = new THREE.BoxBufferGeometry( blockSize, blockSize, blockSize );
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				document.addEventListener( 'keydown', onDocumentKeyDown, false );
 
+				generateBlocks();
 				loadBlockModel();
 			}
 
-			function loadBlockModel() {
-				
-				var blocks = [
-					{
-						"position": [0, 0, 0],
-						"grade": 0.1,
-						"weight": 0.8
-					},
-					{
-						"position": [0, 1, 0],
-						"grade": 0.3,
-						"weight": 1.0
-					},
-					{
-						"position": [1, 0, 0],
-						"grade": 0.25,
-						"weight": 0.5
-					},
-					{
-						"position": [1, 1, 0],
-						"grade": 1.0,
-						"weight": 0.2
-					},
-					{
-						"position": [0, 0, 1],
-						"grade": 0.5,
-						"weight": 0.1
+			function generateBlocks() {
+				blocks = [];
+				var x_blocks = 20;
+				var y_blocks = 20;
+				var z_blocks = 10;
+				for(var i=0; i<x_blocks; i++) {
+					for(var j=0; j<y_blocks; j++) {
+						for(var k=0; k<z_blocks; k++) {
+							var cuGrade = Math.random() / 10.0;
+							var auGrade = Math.random() / 10.0;
+							if(i > (1.0/3.0)*x_blocks && i < (2.0/3.0)*x_blocks && j > (1.0/3.0)*y_blocks && j < (2.0/3.0)*y_blocks && k < (1.0/3.0)*z_blocks) {
+								cuGrade += Math.random() / 2.0;
+								auGrade += Math.random() / 2.0;
+							}
+							blocks.push({
+								"x_index": i,
+								"y_index": j,
+								"z_index": k,
+								"grades": {
+									"au" : auGrade,
+									"cu" : cuGrade,
+								}
+							});
+						}
 					}
-				];
+				}
+			}
 
+			function loadBlockModel() {
+				clearScene();
 				for(var i=0; i<blocks.length; i++) {
 					addBlock(blocks[i]);
 				}
 			}
 
 			function addBlock(block) {
-				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block) } );
-				var cubeGeo = new THREE.BoxBufferGeometry( blockSize, blockSize, blockSize );
+				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), opacity: block.grades[currentGrade], transparent: transparent } );
 				var blockMesh = new THREE.Mesh( cubeGeo, cubeMaterial );
-				blockMesh.position.set( blockSize * block.position[0], blockSize * block.position[1], blockSize * block.position[2]);
+				blockMesh.position.set( blockSize * block.x_index, blockSize * block.y_index, blockSize * block.z_index);
 				scene.add( blockMesh );
 				blockMeshes.push(blockMesh);
 			}
 
 			function getBlockColor(block) {
-				var hue = blockColorProperty == "grade" ? 168 : 50;
-				var lightning = block[blockColorProperty] * 100;
+				var hue = currentGrade == "cu" ? 168 : 50;
+				var lightning = Math.floor((1.0 - block.grades[currentGrade]) * 100);
 				var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
 				return new THREE.Color(hsl);
 			}
@@ -140,10 +145,16 @@
 
 			function onDocumentKeyDown( event ) {
 				switch ( event.keyCode ) {
-
-					case 65: 
-						blockColorProperty = "weight";
-						clearScene();
+					case 65: //a
+						currentGrade = "au";
+						loadBlockModel();
+						break;
+					case 67: //c
+						currentGrade = "cu";
+						loadBlockModel();
+						break;
+					case 84: //t
+						transparent = !transparent;
 						loadBlockModel();
 						break;
 
@@ -160,8 +171,6 @@
 
 			}
 
-		</script><canvas width="3360" height="1088" style="width: 1680px; height: 544px;"></canvas>
-
-	
-
+		</script>
+		
 </body></html>
