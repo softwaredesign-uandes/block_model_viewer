@@ -57,8 +57,8 @@
 				var ambientLight = new THREE.AmbientLight( 0x606060 );
 				scene.add( ambientLight );
 
-				var directionalLight = new THREE.DirectionalLight( 0xffffff );
-				directionalLight.position.set( 1, 0.75, 0.5 ).normalize();
+				var directionalLight = new THREE.PointLight( 0xffffff );
+				directionalLight.position.set( 1000, 1000, 1000 );
 				scene.add( directionalLight );
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -86,8 +86,8 @@
 				for(var i=0; i<x_blocks; i++) {
 					for(var j=0; j<y_blocks; j++) {
 						for(var k=0; k<z_blocks; k++) {
-							var cuGrade = Math.random() / 10.0;
-							var auGrade = Math.random() / 10.0;
+							var cuGrade = 0.0;
+							var auGrade = 0.0;
 							if(i > (1.0/3.0)*x_blocks && i < (2.0/3.0)*x_blocks && j > (1.0/3.0)*y_blocks && j < (2.0/3.0)*y_blocks && k < (1.0/3.0)*z_blocks) {
 								cuGrade += Math.random() / 2.0;
 								auGrade += Math.random() / 2.0;
@@ -114,16 +114,19 @@
 			}
 
 			function addBlock(block) {
-				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), opacity: block.grades[currentGrade], transparent: transparent } );
+				var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), opacity: Math.max(0.02, block.grades[currentGrade]), transparent: transparent } );
 				var blockMesh = new THREE.Mesh( cubeGeo, cubeMaterial );
-				blockMesh.position.set( blockSize * block.x_index, blockSize * block.y_index, blockSize * block.z_index);
+				var blockSizeWithOffset = blockSize * 1.1;
+				blockMesh.position.set( blockSizeWithOffset * block.x_index, blockSizeWithOffset * block.y_index, blockSizeWithOffset * block.z_index);
 				scene.add( blockMesh );
 				blockMeshes.push(blockMesh);
 			}
 
 			function getBlockColor(block) {
+				if (block.grades[currentGrade] < 0.001)
+					return new THREE.Color(0x999999);
 				var hue = currentGrade == "cu" ? 168 : 50;
-				var lightning = Math.floor((1.0 - block.grades[currentGrade]) * 100);
+				var lightning = Math.floor((0.7 - block.grades[currentGrade]) * 100);
 				var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
 				return new THREE.Color(hsl);
 			}
