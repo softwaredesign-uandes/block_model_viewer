@@ -10,11 +10,12 @@ var blockMeshes = [];
 var blockSize = 50;
 
 var UIParams = function() {
-  this.currentGrade = "cu";
+  this.currentAttribute = null;
   this.transparent = false;
 };
 
 var params;
+var gui;
 
 var blocks = [];
 
@@ -50,30 +51,34 @@ function init() {
   window.addEventListener( 'resize', onWindowResize, false );
 
   params = new UIParams();
-  var gui = new dat.GUI();
-  var gradeHandler = gui.add( params, 'currentGrade', ['au', 'cu']);
+  gui = new dat.GUI();
+
+  getBlocks().then(function(response) {
+    response.json().then(function(data) {
+      blocks = data;
+      loadBlockAttributes(blocks[0]);
+      loadBlockModel(blocks);
+    });
+  });
+}
+
+function loadBlockAttributes(block) {
+  var attributeHandler = gui.add(params, 'currentAttribute', Object.keys(block));
   var transparentHandler = gui.add( params, 'transparent');
 
-  gradeHandler.onChange(function() {
+  attributeHandler.onChange(function() {
     loadBlockModel(blocks);
   });
 
   transparentHandler.onChange(function() {
     loadBlockModel(blocks);
   });
-
-  getBlocks().then(function(response) {
-    response.json().then(function(data) {
-      blocks = data;
-      loadBlockModel(blocks);
-    });
-  });
 }
 
 function loadBlockModel(blocks) {
   function addBlock(block) {
     var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), 
-      opacity: Math.max(0.02, block.grades[params.currentGrade]), transparent: params.transparent } );
+      opacity: Math.max(0.02, block[params.currentAttribute]), transparent: params.transparent } );
     var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
     
     var blockSizeWithOffset = blockSize * 1.1;
@@ -86,10 +91,10 @@ function loadBlockModel(blocks) {
   }
 
   function getBlockColor(block) {
-    if (block.grades[params.currentGrade] < 0.001)
+    if (params.currentAttribute === null || block[params.currentAttribute] < 0.001 || block[params.currentAttribute] >= 1)
       return new THREE.Color(0x999999);
-    var hue = params.currentGrade == "cu" ? 168 : 50;
-    var lightning = Math.floor(block.grades[params.currentGrade] * 70);
+    var hue = 168;
+    var lightning = Math.floor(block[params.currentAttribute] * 70);
     var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
     return new THREE.Color(hsl);
   }
