@@ -44,7 +44,11 @@ function init() {
   window.addEventListener( 'resize', onWindowResize, false );
   document.addEventListener( 'keydown', onDocumentKeyDown, false );
 
-  loadBlockModel(getBlocks());
+  getBlocks().then(function(response) {
+    response.json().then(function(data) {
+      loadBlockModel(data);
+    });
+  });
 }
 
 function loadBlockModel(blocks) {
@@ -93,15 +97,12 @@ function onDocumentKeyDown( event ) {
   switch ( event.keyCode ) {
     case 65: //a
       currentGrade = "au";
-      loadBlockModel();
       break;
     case 67: //c
       currentGrade = "cu";
-      loadBlockModel();
       break;
     case 84: //t
       transparent = !transparent;
-      loadBlockModel();
       break;
   }
 }
