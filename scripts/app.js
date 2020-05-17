@@ -9,8 +9,14 @@ var cubeGeometry;
 var blockMeshes = [];
 var blockSize = 50;
 
-var currentGrade = "cu";
-var transparent = false;
+var UIParams = function() {
+  this.currentGrade = "cu";
+  this.transparent = false;
+};
+
+var params;
+
+var blocks = [];
 
 init();
 animate();
@@ -42,11 +48,24 @@ function init() {
   controls.update();
 
   window.addEventListener( 'resize', onWindowResize, false );
-  document.addEventListener( 'keydown', onDocumentKeyDown, false );
+
+  params = new UIParams();
+  var gui = new dat.GUI();
+  var gradeHandler = gui.add( params, 'currentGrade', ['au', 'cu']);
+  var transparentHandler = gui.add( params, 'transparent');
+
+  gradeHandler.onChange(function() {
+    loadBlockModel(blocks);
+  });
+
+  transparentHandler.onChange(function() {
+    loadBlockModel(blocks);
+  });
 
   getBlocks().then(function(response) {
     response.json().then(function(data) {
-      loadBlockModel(data);
+      blocks = data;
+      loadBlockModel(blocks);
     });
   });
 }
@@ -54,7 +73,7 @@ function init() {
 function loadBlockModel(blocks) {
   function addBlock(block) {
     var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), 
-      opacity: Math.max(0.02, block.grades[currentGrade]), transparent: transparent } );
+      opacity: Math.max(0.02, block.grades[params.currentGrade]), transparent: params.transparent } );
     var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
     
     var blockSizeWithOffset = blockSize * 1.1;
@@ -67,10 +86,10 @@ function loadBlockModel(blocks) {
   }
 
   function getBlockColor(block) {
-    if (block.grades[currentGrade] < 0.001)
+    if (block.grades[params.currentGrade] < 0.001)
       return new THREE.Color(0x999999);
-    var hue = currentGrade == "cu" ? 168 : 50;
-    var lightning = Math.floor(block.grades[currentGrade] * 70);
+    var hue = params.currentGrade == "cu" ? 168 : 50;
+    var lightning = Math.floor(block.grades[params.currentGrade] * 70);
     var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
     return new THREE.Color(hsl);
   }
@@ -93,22 +112,12 @@ function onWindowResize() {
   renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-function onDocumentKeyDown( event ) {
-  switch ( event.keyCode ) {
-    case 65: //a
-      currentGrade = "au";
-      break;
-    case 67: //c
-      currentGrade = "cu";
-      break;
-    case 84: //t
-      transparent = !transparent;
-      break;
-  }
-}
-
 function animate() {
   requestAnimationFrame( animate );
+
   controls.update();
+
+
+
   renderer.render( scene, camera );
 }
