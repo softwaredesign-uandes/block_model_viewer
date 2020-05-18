@@ -1,12 +1,11 @@
-var apiBaseUrl = "http://127.0.0.1:5000/api";
-function getBlockModels() {
-
+function getBlockModels(apiBaseUrl) {
+  return fetch(apiBaseUrl + '/api/block_models/');
 }
 
-function getBlockModelInfo(block_model_id) {
-
+function getBlockModelInfo(apiBaseUrl, block_model_name) {
+  return fetch(apiBaseUrl + '/api/block_models/' + block_model_name);
 }
 
-function getBlocks(block_model_id) {
-  return fetch(apiBaseUrl + '/blocks/')
+function getBlocks(apiBaseUrl, block_model_name) {
+  return fetch(apiBaseUrl + '/api/block_models/' + block_model_name + '/blocks/');
 }
