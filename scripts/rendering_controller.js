@@ -38,40 +38,51 @@ function initRenderer() {
   window.addEventListener( 'resize', onWindowResize, false );
 }
 
-function loadBlockModel(blocks) {
-  function addBlock(block) {
-    var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block), 
-      opacity: Math.max(0.02, block[uiParams.currentAttribute]), transparent: uiParams.transparent } );
+function loadBlockModel(blocks, blocksAttributeInfo) {
+  function showBlock(block, blocksAttributeInfo) {
+    if (uiParams.currentAttribute === null) return true;
+    if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
+
+    var range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
+    if (range === 0) return true;
+
+
+    return (100 * block[uiParams.currentAttribute] / range) >= uiParams.threshold;
+  }
+
+  function addBlock(block, blocksAttributeInfo) {
+    var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo) } );
     var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
     
     var blockSizeWithOffset = blockSize * 1.1;
-    blockMesh.position.set( blockSizeWithOffset * block.x_index,
-      blockSizeWithOffset * block.y_index, blockSizeWithOffset * block.z_index);
+    blockMesh.position.set( blockSizeWithOffset * block.x,
+      blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
     blockMeshes.push(blockMesh);
 
     scene.add( blockMesh );
     
   }
 
-  function getBlockColor(block) {
-    if (uiParams.currentAttribute === null || block[uiParams.currentAttribute] < 0.001 || block[uiParams.currentAttribute] >= 1)
-      return new THREE.Color(0x999999);
-    var hue = 168;
-    var lightning = Math.floor(block[uiParams.currentAttribute] * 70);
-    var hsl = "hsl("+ hue + ", 100%, " + lightning + "%)";
+  function getBlockColor(block, blocksAttributeInfo) {
+    if (uiParams.currentAttribute === null) return new THREE.Color(0x999999);
+
+    var min = blocksAttributeInfo[uiParams.currentAttribute].min;
+    var max = blocksAttributeInfo[uiParams.currentAttribute].max;
+    if (min === max) return new THREE.Color(0x999999);
+
+    var value = block[uiParams.currentAttribute];
+
+    var hue = Math.floor(255.0 * value / (max - min));
+    var hsl = "hsl("+ hue + ", 100%, 70%)";
     return new THREE.Color(hsl);
   }
 
   clearScene();
-  for(var i=0; i<blocks.length; i++) {
-    addBlock(blocks[i]);
-  }
+  blocks.filter(function(block) { return showBlock(block, blocksAttributeInfo); }).forEach(function(block) { return addBlock(block, blocksAttributeInfo); })
 }
 
 function clearScene() {
-  for(var i=0; i<blockMeshes.length; i++) {
-    scene.remove(blockMeshes[i]);
-  }; 
+  blockMeshes.forEach(function(mesh) { scene.remove(mesh); });
 }
 
 function onWindowResize() {
