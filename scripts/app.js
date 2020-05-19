@@ -47,7 +47,7 @@ function init() {
               blocks = data;
               blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
               loadBlockAttributes(blocks[0]);
-              loadBlockModel(blocks, blocksAttributeInfo);
+              loadBlockModel(blocks, blocksAttributeInfo, uiParams);
             });
           }).catch(function(err) {
             console.log('Error fetching blocks', err);
@@ -71,15 +71,15 @@ function loadBlockAttributes(block) {
   hideZerosHandler = gui.add(uiParams, 'hideZeros');
 
   attributeHandler.onChange(function() {
-    loadBlockModel(blocks, blocksAttributeInfo);
+    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
   currentAttributeThresholdHandler.onChange(function() {
-    loadBlockModel(blocks, blocksAttributeInfo);
+    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
   hideZerosHandler.onChange(function() {
-    loadBlockModel(blocks, blocksAttributeInfo);
+    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 }
 

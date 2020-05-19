@@ -38,8 +38,8 @@ function initRenderer() {
   window.addEventListener( 'resize', onWindowResize, false );
 }
 
-function loadBlockModel(blocks, blocksAttributeInfo) {
-  function showBlock(block, blocksAttributeInfo) {
+function loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
+  function showBlock(block, blocksAttributeInfo, uiParams) {
     if (uiParams.currentAttribute === null) return true;
     if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
 
@@ -50,8 +50,8 @@ function loadBlockModel(blocks, blocksAttributeInfo) {
     return (100 * block[uiParams.currentAttribute] / range) >= uiParams.threshold;
   }
 
-  function addBlock(block, blocksAttributeInfo) {
-    var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo) } );
+  function addBlock(block, blocksAttributeInfo, uiParams) {
+    var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo, uiParams) } );
     var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
     
     var blockSizeWithOffset = blockSize * 1.1;
@@ -59,11 +59,11 @@ function loadBlockModel(blocks, blocksAttributeInfo) {
       blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
     blockMeshes.push(blockMesh);
 
-    scene.add( blockMesh );
+    scene.add(blockMesh);
     
   }
 
-  function getBlockColor(block, blocksAttributeInfo) {
+  function getBlockColor(block, blocksAttributeInfo, uiParams) {
     if (uiParams.currentAttribute === null) return new THREE.Color(0x999999);
 
     var min = blocksAttributeInfo[uiParams.currentAttribute].min;
@@ -78,7 +78,9 @@ function loadBlockModel(blocks, blocksAttributeInfo) {
   }
 
   clearScene();
-  blocks.filter(function(block) { return showBlock(block, blocksAttributeInfo); }).forEach(function(block) { return addBlock(block, blocksAttributeInfo); })
+  blocks
+    .filter(function(block) { return showBlock(block, blocksAttributeInfo, uiParams); })
+    .forEach(function(block) { return addBlock(block, blocksAttributeInfo, uiParams); })
 }
 
 function clearScene() {
