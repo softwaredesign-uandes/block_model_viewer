@@ -53,14 +53,13 @@ function loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
   function addBlock(block, blocksAttributeInfo, uiParams) {
     var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo, uiParams) } );
     var blockMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
-    
+
     var blockSizeWithOffset = blockSize * 1.1;
     blockMesh.position.set( blockSizeWithOffset * block.x,
       blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
     blockMeshes.push(blockMesh);
 
     scene.add(blockMesh);
-    
   }
 
   function getBlockColor(block, blocksAttributeInfo, uiParams) {
