@@ -12,12 +12,10 @@ var blockSize = 50;
 function initRenderer() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color( 0xf0f0f0 );
-
-  var ambientLight = new THREE.AmbientLight( 0x606060 );
-  scene.add( ambientLight );
+  scene.add( new THREE.AmbientLight( 0x606060 ) );
   var light = new THREE.PointLight( 0xffffff );
   light.position.set( 1000, 1000, 1000 );
-  scene.add( light );
+  scene.add(light);
 
   cubeGeometry = new THREE.BoxBufferGeometry( blockSize, blockSize, blockSize );
 
@@ -78,12 +76,12 @@ function loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
 
   clearScene();
   blocks
-    .filter(function(block) { return showBlock(block, blocksAttributeInfo, uiParams); })
-    .forEach(function(block) { return addBlock(block, blocksAttributeInfo, uiParams); })
+    .filter(block => { return showBlock(block, blocksAttributeInfo, uiParams); })
+    .forEach(block => { return addBlock(block, blocksAttributeInfo, uiParams); })
 }
 
 function clearScene() {
-  blockMeshes.forEach(function(mesh) { scene.remove(mesh); });
+  blockMeshes.forEach(mesh => { scene.remove(mesh); });
 }
 
 function onWindowResize() {

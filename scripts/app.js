@@ -34,14 +34,14 @@ function init() {
 
   var urlHandler = gui.add(apiParams, 'apiUrl');
 
-  urlHandler.onChange(async function() {
+  urlHandler.onChange(async () => {
     let block_models = await client.getBlockModels(apiParams.apiUrl);
-    let blockModelNames = block_models.map(function(block_model) { return block_model.name; });
+    let blockModelNames = block_models.map(block_model => { return block_model.name; });
 
     if (namesHandler) gui.remove(namesHandler);
     namesHandler = gui.add(apiParams, 'currentBlockModel', blockModelNames);
 
-    namesHandler.onChange(async function(name) {
+    namesHandler.onChange(async (name) => {
       blocks = await client.getBlocks(apiParams.apiUrl, name);
       blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
       loadBlockAttributes(blocks[0]);
@@ -60,24 +60,24 @@ function loadBlockAttributes(block) {
   if (hideZerosHandler) gui.remove(hideZerosHandler);
   hideZerosHandler = gui.add(uiParams, 'hideZeros');
 
-  attributeHandler.onChange(function() {
+  attributeHandler.onChange(() => {
     loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
-  currentAttributeThresholdHandler.onChange(function() {
+  currentAttributeThresholdHandler.onChange(() => {
     loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
-  hideZerosHandler.onChange(function() {
+  hideZerosHandler.onChange(() => {
     loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 }
 
 function calculateBlockAttributesInfo(blocks) {
-  return Object.keys(blocks[0]).reduce(function(map, a) {
+  return Object.keys(blocks[0]).reduce((map, a) => {
     map[a] = {
-      min: Math.min.apply(Math, blocks.map(function(b) { return b[a]; })), 
-      max: Math.max.apply(Math, blocks.map(function(b) { return b[a]; }))
+      min: Math.min.apply(Math, blocks.map(b => { return b[a]; })), 
+      max: Math.max.apply(Math, blocks.map(b => { return b[a]; }))
     };
     return map;
   }, {});
