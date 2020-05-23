@@ -20,6 +20,8 @@ var gui;
 var blocks = [];
 var blocksAttributeInfo = {};
 
+const client = new APICLient();
+
 init();
 animate();
 
@@ -32,30 +34,18 @@ function init() {
 
   var urlHandler = gui.add(apiParams, 'apiUrl');
 
-  urlHandler.onChange(function() {
-    getBlockModels(apiParams.apiUrl).then(function(response) {
-      response.json().then(function(data) {
-        var block_models = data;
-        var blockModelNames = block_models.map(function(block_model) { return block_model.name; });
+  urlHandler.onChange(async function() {
+    let block_models = await client.getBlockModels(apiParams.apiUrl);
+    let blockModelNames = block_models.map(function(block_model) { return block_model.name; });
 
-        if (namesHandler) gui.remove(namesHandler);
-        namesHandler = gui.add(apiParams, 'currentBlockModel', blockModelNames);
+    if (namesHandler) gui.remove(namesHandler);
+    namesHandler = gui.add(apiParams, 'currentBlockModel', blockModelNames);
 
-        namesHandler.onChange(function(name) {
-          getBlocks(apiParams.apiUrl, name).then(function(response) {
-            response.json().then(function(data) {
-              blocks = data;
-              blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
-              loadBlockAttributes(blocks[0]);
-              loadBlockModel(blocks, blocksAttributeInfo, uiParams);
-            });
-          }).catch(function(err) {
-            console.log('Error fetching blocks', err);
-          });
-        });
-      });
-    }).catch(function(err) {
-      console.log('Error fetching block_models', err);
+    namesHandler.onChange(async function(name) {
+      blocks = await client.getBlocks(apiParams.apiUrl, name);
+      blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
+      loadBlockAttributes(blocks[0]);
+      loadBlockModel(blocks, blocksAttributeInfo, uiParams);
     });
   });
 }
