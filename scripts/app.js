@@ -21,12 +21,13 @@ var blocks = [];
 var blocksAttributeInfo = {};
 
 const client = new APICLient();
+const renderingController = new RenderingController();
 
 init();
-animate();
+renderingController.animate();
 
 function init() {
-  initRenderer();
+  renderingController.initRenderer();
 
   uiParams = new UIParams();
   apiParams = new APIParams();
@@ -45,7 +46,7 @@ function init() {
       blocks = await client.getBlocks(apiParams.apiUrl, name);
       blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
       loadBlockAttributes(blocks[0]);
-      loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+      renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
     });
   });
 }
@@ -61,15 +62,15 @@ function loadBlockAttributes(block) {
   hideZerosHandler = gui.add(uiParams, 'hideZeros');
 
   attributeHandler.onChange(() => {
-    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
   currentAttributeThresholdHandler.onChange(() => {
-    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 
   hideZerosHandler.onChange(() => {
-    loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
   });
 }
 
