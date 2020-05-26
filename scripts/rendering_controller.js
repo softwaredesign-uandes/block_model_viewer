@@ -8,6 +8,11 @@ var cubeGeometry;
 
 var blockMeshes = [];
 var blockSize = 50;
+var selectedBlock;
+var selectedBlockColor;
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
 
 function initRenderer() {
   scene = new THREE.Scene();
@@ -34,6 +39,7 @@ function initRenderer() {
   controls.update();
 
   window.addEventListener( 'resize', onWindowResize, false );
+  window.addEventListener( 'mousemove', onMouseMove, false );
 }
 
 function loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
@@ -84,14 +90,35 @@ function clearScene() {
   blockMeshes.forEach(mesh => { scene.remove(mesh); });
 }
 
+function selectBlock() {
+  raycaster.setFromCamera( mouse, camera );
+
+  var intersects = raycaster.intersectObjects( scene.children );
+  var newSelectedBlock = intersects.length > 0 ? intersects[0].object : null;
+  if (newSelectedBlock === selectedBlock) return;
+
+  if (selectedBlock) selectedBlock.material.color.set(selectedBlockColor);
+  if (newSelectedBlock) {
+    selectedBlockColor = newSelectedBlock.material.color.clone();
+    newSelectedBlock.material.color.set(0x000000);
+  }
+  selectedBlock = newSelectedBlock;
+}
+
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
+function onMouseMove(event) {
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+}
+
 function animate() {
   requestAnimationFrame( animate );
   controls.update();
+  selectBlock();
   renderer.render( scene, camera );
 }
