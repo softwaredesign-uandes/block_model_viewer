@@ -25,14 +25,13 @@ canvas {
 	display: block;
 }
 
-#info {
+.info {
 	position: absolute;
-	top: 0px;
-	width: 100%;
+	right: 0px;
+	bottom: 0px;
 	padding: 10px;
 	box-sizing: border-box;
-	text-align: center;
-	z-index: 1; /* TODO Solve this in HTML */
+	z-index: 1;
 }
 
 .dg.ac {

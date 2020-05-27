@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<title>three.js webgl - interactive - voxel painter</title>
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>BlockModel Viewer</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<link type="text/css" rel="stylesheet" href="styles/main.css">
-	</head>
-	<body>
 
 		<script src="scripts/libs/three.js"></script>
 		<script src="scripts/libs/orbitControls.js"></script>
@@ -16,5 +15,29 @@
 		<script src="scripts/api_client.js"></script>
 		<script src="scripts/feature_flag_client.js"></script>
 		<script src="scripts/rendering_controller.js"></script>
+	</head>
+	<body>
 		<script src="scripts/app.js"></script>
-</body></html>
+		<div class="info">
+			<h3>Block Info</h3>
+			<p>
+				<label>Index:</label>
+				<span id="index">?</span>
+			</p>
+			<p>
+				<label>X,Y,Z:</label>
+				<span id="position">?</span>
+			</p>
+			<p>
+				<label>Grades (%):</label>
+				<ul id="grades">
+					<li>?</li>
+				</ul>
+			</p>
+			<p>
+				<label>Mass (kg):</label>
+				<span id="mass">?</span>
+			</p>
+		</div>
+	</body>
+</html>
