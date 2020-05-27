@@ -4,7 +4,7 @@ class RenderingController {
     this.controls;
     this.cubeGeometry;
 
-    this.blockMeshes = { };
+    this.blockMeshes = [];
     this.blockSize = 50;
     this.selectedBlockMesh;
     this.selectedBlockMeshColor;
@@ -74,7 +74,7 @@ class RenderingController {
       var blockSizeWithOffset = blockSize * 1.1;
       blockMesh.position.set( blockSizeWithOffset * block.x,
         blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
-      blockMeshes[blockMesh] = block;
+      blockMeshes.push({ mesh: blockMesh, block: block});
 
       scene.add(blockMesh);
     }
@@ -100,14 +100,15 @@ class RenderingController {
   }
 
   clearScene() {
-    Object.keys(this.blockMeshes).forEach(mesh => { this.scene.remove(mesh); });
+    this.blockMeshes.forEach(bm => { this.scene.remove(bm.mesh); });
+    this.blockMeshes = []
   }
 
   selectBlock() {
     this.raycaster.setFromCamera( this.mouse, this.camera );
 
-    var intersects = this.raycaster.intersectObjects( this.scene.children );
-    var newSelectedBlockMesh = intersects.length > 0 ? intersects[0].object : null;
+    let intersects = this.raycaster.intersectObjects( this.scene.children );
+    let newSelectedBlockMesh = intersects.length > 0 ? intersects[0].object : null;
     if (newSelectedBlockMesh === this.selectedBlockMesh) return;
 
     if (this.selectedBlockMesh) this.selectedBlockMesh.material.color.set(this.selectedBlockMeshColor);
@@ -116,7 +117,8 @@ class RenderingController {
       newSelectedBlockMesh.material.color.set(0x000000);
     }
     this.selectedBlockMesh = newSelectedBlockMesh;
-    if (this.blockMeshes[this.selectedBlockMesh]) this.updateBlockInfo(this.blockMeshes[this.selectedBlockMesh].index);
+    let selectedBlock = this.blockMeshes.find(bm => bm.mesh === this.selectedBlockMesh);
+    if (selectedBlock) this.updateBlockInfo(selectedBlock.block.index);
   }
 
   animate() {

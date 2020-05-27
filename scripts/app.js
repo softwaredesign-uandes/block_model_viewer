@@ -94,6 +94,9 @@ function calculateBlockAttributesInfo(blocks) {
 }
 
 async function updateBlockInfo(blockIndex) {
+  let block_info = await featureFlagsClient.isEnabled('block_info');
+  if (!block_info) return;
+
   let block = await client.getBlock(apiParams.apiUrl, apiParams.currentBlockModel, blockIndex);
   block = block["block"];
   let indexElement = document.getElementById("index");
