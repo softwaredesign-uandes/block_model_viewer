@@ -1,24 +1,25 @@
-var UIParams = function() {
+const UIParams = function() {
   this.currentAttribute = null;
   this.threshold = 0;
   this.hideZeros = true;
 };
 
-var APIParams = function() {
+const APIParams = function() {
   this.apiUrl = "";
+  this.featureFlagUrl = "https://dry-brushlands-69779.herokuapp.com";
   this.currentBlockModel = null;
 };
 
-var uiParams;
-var clientParams;
-var namesHandler;
-var attributeHandler;
-var currentAttributeThresholdHandler;
-var hideZerosHandler;
-var gui;
+let uiParams;
+let clientParams;
+let namesHandler;
+let attributeHandler;
+let currentAttributeThresholdHandler;
+let hideZerosHandler;
+let gui;
 
-var blocks = [];
-var blocksAttributeInfo = {};
+let blocks = [];
+let blocksAttributeInfo = {};
 
 const client = new APICLient();
 const featureFlagsClient = new FeatureFlagsCLient();
@@ -34,11 +35,12 @@ function init() {
   apiParams = new APIParams();
   gui = new dat.GUI();
 
-  var urlHandler = gui.add(apiParams, 'apiUrl');
+  gui.add(apiParams, 'featureFlagUrl');
+  let urlHandler = gui.add(apiParams, 'apiUrl');
 
   urlHandler.onChange(async () => {
     let block_models = await client.getBlockModels(apiParams.apiUrl);
-    let restful_response = await featureFlagsClient.isEnabled('restful_response');
+    let restful_response = await featureFlagsClient.isEnabled(apiParams.featureFlagUrl, 'restful_response');
     if (restful_response) {
       block_models = block_models['block_models'];
     }
@@ -49,7 +51,7 @@ function init() {
 
     namesHandler.onChange(async (name) => {
       blocks = await client.getBlocks(apiParams.apiUrl, name);
-      let restful_response = await featureFlagsClient.isEnabled('restful_response');
+      let restful_response = await featureFlagsClient.isEnabled(apiParams.featureFlagUrl, 'restful_response');
       if (restful_response) {
         blocks = blocks['block_model']['blocks'];
       }
@@ -94,7 +96,7 @@ function calculateBlockAttributesInfo(blocks) {
 }
 
 async function updateBlockInfo(blockIndex) {
-  let block_info = await featureFlagsClient.isEnabled('block_info');
+  let block_info = await featureFlagsClient.isEnabled(apiParams.featureFlagUrl, 'block_info');
   if (!block_info) return;
 
   let block = await client.getBlock(apiParams.apiUrl, apiParams.currentBlockModel, blockIndex);

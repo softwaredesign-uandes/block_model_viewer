@@ -1,8 +1,6 @@
-FEATURE_FLAG_API_URL = 'https://dry-brushlands-69779.herokuapp.com/api/feature_flags/'
-
 class FeatureFlagsCLient {
-  async isEnabled(flag) {
-    let response = await fetch(FEATURE_FLAG_API_URL);
+  async isEnabled(apiBaseUrl, flag) {
+    let response = await fetch(apiBaseUrl + '/api/feature_flags/');
     let data = await response.json()
     return data[flag];
   }

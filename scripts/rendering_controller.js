@@ -19,7 +19,7 @@ class RenderingController {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color( 0xf0f0f0 );
     this.scene.add( new THREE.AmbientLight( 0x606060 ) );
-    var light = new THREE.PointLight( 0xffffff );
+    let light = new THREE.PointLight( 0xffffff );
     light.position.set( 1000, 1000, 1000 );
     this.scene.add(light);
 
@@ -39,7 +39,7 @@ class RenderingController {
     this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement );
     this.controls.update();
 
-    var that = this;
+    let that = this;
     function onWindowResize() {
       that.camera.aspect = window.innerWidth / window.innerHeight;
       that.camera.updateProjectionMatrix();
@@ -60,7 +60,7 @@ class RenderingController {
       if (uiParams.currentAttribute === null) return true;
       if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
 
-      var range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
+      let range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
       if (range === 0) return true;
 
 
@@ -68,10 +68,10 @@ class RenderingController {
     }
 
     function addBlock(block, blocksAttributeInfo, uiParams, scene, blockMeshes, geometry, blockSize) {
-      var cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo, uiParams) } );
-      var blockMesh = new THREE.Mesh( geometry, cubeMaterial );
+      let cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo, uiParams) } );
+      let blockMesh = new THREE.Mesh( geometry, cubeMaterial );
 
-      var blockSizeWithOffset = blockSize * 1.1;
+      let blockSizeWithOffset = blockSize * 1.1;
       blockMesh.position.set( blockSizeWithOffset * block.x,
         blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
       blockMeshes.push({ mesh: blockMesh, block: block});
@@ -82,14 +82,14 @@ class RenderingController {
     function getBlockColor(block, blocksAttributeInfo, uiParams) {
       if (uiParams.currentAttribute === null) return new THREE.Color(0x999999);
 
-      var min = blocksAttributeInfo[uiParams.currentAttribute].min;
-      var max = blocksAttributeInfo[uiParams.currentAttribute].max;
+      let min = blocksAttributeInfo[uiParams.currentAttribute].min;
+      let max = blocksAttributeInfo[uiParams.currentAttribute].max;
       if (min === max) return new THREE.Color(0x999999);
 
-      var value = block[uiParams.currentAttribute];
+      let value = block[uiParams.currentAttribute];
 
-      var hue = Math.floor(255.0 * value / (max - min));
-      var hsl = "hsl("+ hue + ", 100%, 70%)";
+      let hue = Math.floor(255.0 * value / (max - min));
+      let hsl = "hsl("+ hue + ", 100%, 70%)";
       return new THREE.Color(hsl);
     }
 
