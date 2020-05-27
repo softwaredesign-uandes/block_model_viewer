@@ -22,7 +22,7 @@ var blocksAttributeInfo = {};
 
 const client = new APICLient();
 const featureFlagsClient = new FeatureFlagsCLient();
-const renderingController = new RenderingController();
+const renderingController = new RenderingController(updateBlockInfo);
 
 init();
 renderingController.animate();
@@ -86,9 +86,32 @@ function loadBlockAttributes(block) {
 function calculateBlockAttributesInfo(blocks) {
   return Object.keys(blocks[0]).reduce((map, a) => {
     map[a] = {
-      min: Math.min.apply(Math, blocks.map(b => { return b[a]; })), 
+      min: Math.min.apply(Math, blocks.map(b => { return b[a]; })),
       max: Math.max.apply(Math, blocks.map(b => { return b[a]; }))
     };
     return map;
   }, {});
+}
+
+async function updateBlockInfo(blockIndex) {
+  let block = await client.getBlock(apiParams.apiUrl, apiParams.currentBlockModel, blockIndex);
+  block = block["block"];
+  let indexElement = document.getElementById("index");
+  indexElement.textContent = block.index;
+  let positionElement = document.getElementById("position");
+  positionElement.textContent = "" + block.x + "," + block.y + "," + block.z + ",";
+  let massElement = document.getElementById("mass");
+  massElement.textContent = block.mass;
+  let gradeElement = document.getElementById("grades");
+  gradeElement.innerHTML = '';
+  Object.keys(block.grades).forEach((g) => {
+    let newLi = document.createElement("li");
+    let newLabel = document.createElement("label");
+    newLabel.textContent = g + ": ";
+    let newSpan = document.createElement("span");
+    newSpan.textContent = block.grades[g];
+    newLi.appendChild(newLabel);
+    newLi.appendChild(newSpan);
+    gradeElement.appendChild(newLi);
+  });
 }

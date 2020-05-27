@@ -28,10 +28,11 @@ canvas {
 .info {
 	position: absolute;
 	right: 0px;
-	bottom: 0px;
+	bottom: 20px;
 	padding: 10px;
 	box-sizing: border-box;
 	z-index: 1;
+	width: 250px;
 }
 
 .dg.ac {

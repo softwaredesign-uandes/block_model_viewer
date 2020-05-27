@@ -1,16 +1,18 @@
 class RenderingController {
-  constructor() {
+  constructor(updateBlockInfo) {
     this.camera, this.scene, this.renderer;
     this.controls;
     this.cubeGeometry;
 
-    this.blockMeshes = [];
+    this.blockMeshes = { };
     this.blockSize = 50;
-    this.selectedBlock;
-    this.selectedBlockColor;
+    this.selectedBlockMesh;
+    this.selectedBlockMeshColor;
 
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
+
+    this.updateBlockInfo = updateBlockInfo
   }
 
   initRenderer() {
@@ -72,7 +74,7 @@ class RenderingController {
       var blockSizeWithOffset = blockSize * 1.1;
       blockMesh.position.set( blockSizeWithOffset * block.x,
         blockSizeWithOffset * block.y, blockSizeWithOffset * block.z);
-      blockMeshes.push(blockMesh);
+      blockMeshes[blockMesh] = block;
 
       scene.add(blockMesh);
     }
@@ -98,22 +100,23 @@ class RenderingController {
   }
 
   clearScene() {
-    this.blockMeshes.forEach(mesh => { this.scene.remove(mesh); });
+    Object.keys(this.blockMeshes).forEach(mesh => { this.scene.remove(mesh); });
   }
 
   selectBlock() {
     this.raycaster.setFromCamera( this.mouse, this.camera );
 
     var intersects = this.raycaster.intersectObjects( this.scene.children );
-    var newSelectedBlock = intersects.length > 0 ? intersects[0].object : null;
-    if (newSelectedBlock === this.selectedBlock) return;
+    var newSelectedBlockMesh = intersects.length > 0 ? intersects[0].object : null;
+    if (newSelectedBlockMesh === this.selectedBlockMesh) return;
 
-    if (this.selectedBlock) this.selectedBlock.material.color.set(this.selectedBlockColor);
-    if (newSelectedBlock) {
-      this.selectedBlockColor = newSelectedBlock.material.color.clone();
-      newSelectedBlock.material.color.set(0x000000);
+    if (this.selectedBlockMesh) this.selectedBlockMesh.material.color.set(this.selectedBlockMeshColor);
+    if (newSelectedBlockMesh) {
+      this.selectedBlockMeshColor = newSelectedBlockMesh.material.color.clone();
+      newSelectedBlockMesh.material.color.set(0x000000);
     }
-    this.selectedBlock = newSelectedBlock;
+    this.selectedBlockMesh = newSelectedBlockMesh;
+    if (this.blockMeshes[this.selectedBlockMesh]) this.updateBlockInfo(this.blockMeshes[this.selectedBlockMesh].index);
   }
 
   animate() {
