@@ -21,6 +21,7 @@ var blocks = [];
 var blocksAttributeInfo = {};
 
 const client = new APICLient();
+const featureFlagsClient = new FeatureFlagsCLient();
 const renderingController = new RenderingController();
 
 init();
@@ -37,6 +38,10 @@ function init() {
 
   urlHandler.onChange(async () => {
     let block_models = await client.getBlockModels(apiParams.apiUrl);
+    let restful_response = await featureFlagsClient.isEnabled('restful_response');
+    if (restful_response) {
+      block_models = block_models['block_models'];
+    }
     let blockModelNames = block_models.map(block_model => { return block_model.name; });
 
     if (namesHandler) gui.remove(namesHandler);
@@ -44,6 +49,10 @@ function init() {
 
     namesHandler.onChange(async (name) => {
       blocks = await client.getBlocks(apiParams.apiUrl, name);
+      let restful_response = await featureFlagsClient.isEnabled('restful_response');
+      if (restful_response) {
+        blocks = blocks['block_model']['blocks'];
+      }
       blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
       loadBlockAttributes(blocks[0]);
       renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
