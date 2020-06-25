@@ -1,5 +1,5 @@
 class RenderingController {
-  constructor(updateBlockInfo) {
+  constructor(updateBlockInfo, extractBlock) {
     this.camera, this.scene, this.renderer;
     this.controls;
     this.cubeGeometry;
@@ -12,7 +12,8 @@ class RenderingController {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
-    this.updateBlockInfo = updateBlockInfo
+    this.updateBlockInfo = updateBlockInfo;
+    this.extractBlock = extractBlock;
   }
 
   initRenderer() {
@@ -49,10 +50,18 @@ class RenderingController {
     function onMouseMove(event) {
       that.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
       that.mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      if(that.selectBlock()) {
+        if (that.selectedBlock) that.updateBlockInfo(that.selectedBlock.index);
+      }
+    }
+
+    function onKeyUp(event) {
+      if (event.key === "e" && that.selectedBlock) that.extractBlock(that.selectedBlock.index);
     }
 
     window.addEventListener( 'resize', onWindowResize, false );
     window.addEventListener( 'mousemove', onMouseMove, false );
+    window.addEventListener( 'keyup', onKeyUp, false );
   }
 
   loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
@@ -109,7 +118,7 @@ class RenderingController {
 
     let intersects = this.raycaster.intersectObjects( this.scene.children );
     let newSelectedBlockMesh = intersects.length > 0 ? intersects[0].object : null;
-    if (newSelectedBlockMesh === this.selectedBlockMesh) return;
+    if (newSelectedBlockMesh === this.selectedBlockMesh) return false;
 
     if (this.selectedBlockMesh) this.selectedBlockMesh.material.color.set(this.selectedBlockMeshColor);
     if (newSelectedBlockMesh) {
@@ -117,14 +126,15 @@ class RenderingController {
       newSelectedBlockMesh.material.color.set(0x000000);
     }
     this.selectedBlockMesh = newSelectedBlockMesh;
-    let selectedBlock = this.blockMeshes.find(bm => bm.mesh === this.selectedBlockMesh);
-    if (selectedBlock) this.updateBlockInfo(selectedBlock.block.index);
+    if (this.selectedBlockMesh === null) return false;
+
+    this.selectedBlock = this.blockMeshes.find(bm => bm.mesh === this.selectedBlockMesh).block;
+    return true;
   }
 
   animate() {
     requestAnimationFrame(this.animate.bind(this));
     this.controls.update();
-    this.selectBlock();
     this.renderer.render( this.scene, this.camera );
   }
 }

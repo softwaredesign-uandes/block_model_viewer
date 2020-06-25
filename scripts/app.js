@@ -23,7 +23,7 @@ let blocksAttributeInfo = {};
 
 const client = new APICLient();
 const featureFlagsClient = new FeatureFlagsCLient();
-const renderingController = new RenderingController(updateBlockInfo);
+const renderingController = new RenderingController(updateBlockInfo, extractBlock);
 
 init();
 renderingController.animate();
@@ -119,4 +119,11 @@ async function updateBlockInfo(blockIndex) {
     newLi.appendChild(newSpan);
     gradeElement.appendChild(newLi);
   });
+}
+
+async function extractBlock(blockIndex) {
+  let blocksToExtract = await client.extractBlock(apiParams.apiUrl, apiParams.currentBlockModel, blockIndex);
+  blocksToExtract = blocksToExtract["blocks"]
+  blocks = blocks.filter(b => !blocksToExtract.find(eb => eb.index === b.index));
+  renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
 }
