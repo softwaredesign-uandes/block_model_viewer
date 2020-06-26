@@ -64,20 +64,9 @@ class RenderingController {
     window.addEventListener( 'keyup', onKeyUp, false );
   }
 
-  loadBlockModel(blocks, blocksAttributeInfo, uiParams) {
-    function showBlock(block, blocksAttributeInfo, uiParams) {
-      if (uiParams.currentAttribute === null) return true;
-      if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
-
-      let range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
-      if (range === 0) return true;
-
-
-      return (100 * block[uiParams.currentAttribute] / range) >= uiParams.threshold;
-    }
-
-    function addBlock(block, blocksAttributeInfo, uiParams, scene, blockMeshes, geometry, blockSize) {
-      let cubeMaterial = new THREE.MeshLambertMaterial( { color: getBlockColor(block, blocksAttributeInfo, uiParams) } );
+  loadBlockModel(blocks) {
+    function addBlock(block, scene, blockMeshes, geometry, blockSize) {
+      let cubeMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color(0x999999) } );
       let blockMesh = new THREE.Mesh( geometry, cubeMaterial );
 
       let blockSizeWithOffset = blockSize * 1.1;
@@ -86,6 +75,24 @@ class RenderingController {
       blockMeshes.push({ mesh: blockMesh, block: block});
 
       scene.add(blockMesh);
+    }
+
+    this.clearScene();
+    blocks
+      .forEach(block => { return addBlock(block, this.scene, this.blockMeshes, this.cubeGeometry, this.blockSize); })
+  }
+
+  updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks) {
+    function showBlock(block, blocksAttributeInfo, uiParams, extractedBlocks) {
+      if (extractedBlocks.find(ebIndex => ebIndex === block.index)) return false;
+      if (uiParams.currentAttribute === null) return true;
+      if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
+
+      let range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
+      if (range === 0) return true;
+
+
+      return (100 * block[uiParams.currentAttribute] / range) >= uiParams.threshold;
     }
 
     function getBlockColor(block, blocksAttributeInfo, uiParams) {
@@ -102,10 +109,12 @@ class RenderingController {
       return new THREE.Color(hsl);
     }
 
-    this.clearScene();
-    blocks
-      .filter(block => { return showBlock(block, blocksAttributeInfo, uiParams); })
-      .forEach(block => { return addBlock(block, blocksAttributeInfo, uiParams, this.scene, this.blockMeshes, this.cubeGeometry, this.blockSize); })
+
+    this.blockMeshes.forEach(bm => {
+      bm.mesh.material.color.setHex(getBlockColor(bm.block, blocksAttributeInfo, uiParams).getHex());
+      bm.mesh.visible = showBlock(bm.block, blocksAttributeInfo, uiParams, extractedBlocks);
+      bm.mesh.needsUpdate = true;
+    });
   }
 
   clearScene() {

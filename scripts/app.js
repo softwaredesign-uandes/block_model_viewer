@@ -19,6 +19,7 @@ let hideZerosHandler;
 let gui;
 
 let blocks = [];
+let extractedBlocks = [];
 let blocksAttributeInfo = {};
 
 const client = new APICLient();
@@ -57,7 +58,9 @@ function init() {
       }
       blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
       loadBlockAttributes(blocks[0]);
-      renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+      extractedBlocks = [];
+      uiParams.currentAttribute = null;
+      renderingController.loadBlockModel(blocks);
     });
   });
 }
@@ -73,15 +76,15 @@ function loadBlockAttributes(block) {
   hideZerosHandler = gui.add(uiParams, 'hideZeros');
 
   attributeHandler.onChange(() => {
-    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks);
   });
 
   currentAttributeThresholdHandler.onChange(() => {
-    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks);
   });
 
   hideZerosHandler.onChange(() => {
-    renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+    renderingController.updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks);
   });
 }
 
@@ -109,6 +112,8 @@ async function updateBlockInfo(blockIndex) {
   massElement.textContent = block.mass;
   let gradeElement = document.getElementById("grades");
   gradeElement.innerHTML = '';
+
+  if (!block.grades) return;
   Object.keys(block.grades).forEach((g) => {
     let newLi = document.createElement("li");
     let newLabel = document.createElement("label");
@@ -123,7 +128,6 @@ async function updateBlockInfo(blockIndex) {
 
 async function extractBlock(blockIndex) {
   let blocksToExtract = await client.extractBlock(apiParams.apiUrl, apiParams.currentBlockModel, blockIndex);
-  blocksToExtract = blocksToExtract["blocks"]
-  blocks = blocks.filter(b => !blocksToExtract.find(eb => eb.index === b.index));
-  renderingController.loadBlockModel(blocks, blocksAttributeInfo, uiParams);
+  extractedBlocks = extractedBlocks.concat(blocksToExtract["blocks"].map(b => b.index));
+  renderingController.updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks);
 }
