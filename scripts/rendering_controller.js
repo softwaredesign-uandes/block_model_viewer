@@ -23,6 +23,10 @@ class RenderingController {
     let light = new THREE.PointLight( 0xffffff );
     light.position.set( 1000, 1000, 1000 );
     this.scene.add(light);
+    let lightTwo = new THREE.PointLight( 0xffffff );
+    lightTwo.position.set( 1000, 1000, -1000 );
+    this.scene.add(lightTwo);
+
 
     this.cubeGeometry = new THREE.BoxBufferGeometry( this.blockSize, this.blockSize, this.blockSize );
 
@@ -85,24 +89,24 @@ class RenderingController {
   updateBlockModel(blocksAttributeInfo, uiParams, extractedBlocks) {
     function showBlock(block, blocksAttributeInfo, uiParams, extractedBlocks) {
       if (extractedBlocks.find(ebIndex => ebIndex === block.index)) return false;
-      if (uiParams.currentAttribute === null) return true;
-      if (uiParams.hideZeros && (block[uiParams.currentAttribute] === 0)) return false;
+      if (uiParams.column === null) return true;
+      if (uiParams.filterZeros && (block[uiParams.column] === 0)) return false;
 
-      let range = blocksAttributeInfo[uiParams.currentAttribute].max - blocksAttributeInfo[uiParams.currentAttribute].min;
+      let range = blocksAttributeInfo[uiParams.column].max - blocksAttributeInfo[uiParams.column].min;
       if (range === 0) return true;
 
 
-      return (100 * block[uiParams.currentAttribute] / range) >= uiParams.threshold;
+      return (100 * block[uiParams.column] / range) >= uiParams.filter;
     }
 
     function getBlockColor(block, blocksAttributeInfo, uiParams) {
-      if (uiParams.currentAttribute === null) return new THREE.Color(0x999999);
+      if (uiParams.column === null) return new THREE.Color(0x999999);
 
-      let min = blocksAttributeInfo[uiParams.currentAttribute].min;
-      let max = blocksAttributeInfo[uiParams.currentAttribute].max;
+      let min = blocksAttributeInfo[uiParams.column].min;
+      let max = blocksAttributeInfo[uiParams.column].max;
       if (min === max) return new THREE.Color(0x999999);
 
-      let value = block[uiParams.currentAttribute];
+      let value = block[uiParams.column];
 
       let hue = Math.floor(255.0 * value / (max - min));
       let hsl = "hsl("+ hue + ", 100%, 70%)";
