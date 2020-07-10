@@ -13,7 +13,6 @@ let gui;
 
 let blocks = [];
 let extractedBlocks = [];
-let blocksAttributeInfo = {};
 
 const client = new APICLient();
 const renderingController = new RenderingController(updateBlockInfo, extractBlock);
@@ -34,15 +33,14 @@ async function init() {
 
   namesHandler.onChange(async (name) => {
     blocks = await client.getBlocks(name);
-    blocksAttributeInfo = calculateBlockAttributesInfo(blocks);
-    loadBlockAttributes(blocks[0]);
+    loadBlockAttributes(calculateBlockAttributesInfo(blocks), blocks[0]);
     extractedBlocks = [];
     uiParams.column = null;
     renderingController.loadBlockModel(blocks);
   });
 }
 
-function loadBlockAttributes(block) {
+function loadBlockAttributes(blocksAttributeInfo, block) {
   if (attributeHandler) gui.remove(attributeHandler);
   attributeHandler = gui.add(uiParams, 'column', Object.keys(block));
 
